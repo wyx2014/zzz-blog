@@ -1,0 +1,123 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Card from '../components/Card.astro';
+import Tag from '../components/Tag.astro';
+import { getCollection } from 'astro:content';
+
+// Fetch all posts, filter drafts, and sort by date descending
+const allPosts = await getCollection('blog', ({ data }) => {
+  return import.meta.env.PROD ? !data.draft : true;
+});
+
+const sortedPosts = allPosts.sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const recentPosts = sortedPosts.slice(0, 3);
+
+// Fetch all unique tags and count them
+const tags = allPosts.flatMap(post => post.data.tags);
+const tagCounts = tags.reduce((acc, tag) => {
+  acc[tag] = (acc[tag] || 0) + 1;
+  return acc;
+}, {} as Record<string, number>);
+
+const popularTags = Object.keys(tagCounts)
+  .sort((a, b) => tagCounts[b] - tagCounts[a])
+  .slice(0, 8);
+---
+
+<Layout title="王焕章agi's Journal - 做务实的AI学习者">
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-12">
+    <!-- Main Left Content: Hero & Recent Posts -->
+    <div class="lg:col-span-3 flex flex-col space-y-12">
+      
+      <!-- Hero Section -->
+      <section class="border-b border-border-base pb-10 flex flex-col space-y-6">
+        <span class="text-xs font-semibold uppercase tracking-wider text-accent-base">Journal & Notes</span>
+        <h1 class="font-serif text-4xl font-bold tracking-tight text-text-base md:text-5xl lg:text-6xl leading-[1.15]">
+          做一个务实的 AI 学习者。
+        </h1>
+        <p class="text-base text-text-muted leading-relaxed max-w-2xl md:text-lg">
+          欢迎来到我的个人博客。这里记录我对 AI、产品、编程、跨境和个人成长的学习与实践。我不想只追热点，也不想停留在收藏资料和空想里。更希望把看到的东西真正用起来：做项目、写代码、试产品、跑业务、踩坑、复盘。
+        </p>
+      </section>
+
+      <!-- Recent Posts Section -->
+      <section class="flex flex-col">
+        <div class="flex items-baseline justify-between border-b border-border-base/60 pb-3 mb-2">
+          <h2 class="font-serif text-xl font-semibold tracking-tight text-text-base md:text-2xl">
+            近期文章
+          </h2>
+          <a href="/posts/1" class="text-sm font-medium text-accent-base hover:text-accent-hover transition-colors underline-hover">
+            浏览全部文章 &rarr;
+          </a>
+        </div>
+
+        {recentPosts.length > 0 ? (
+          <div class="flex flex-col">
+            {recentPosts.map((post) => (
+              <Card 
+                title={post.data.title}
+                description={post.data.description}
+                pubDate={post.data.pubDate}
+                slug={post.id.replace(/\.[^/.]+$/, "")}
+                tags={post.data.tags}
+              />
+            ))}
+          </div>
+        ) : (
+          <p class="py-8 text-text-muted text-sm italic">暂无发布文章。</p>
+        )}
+      </section>
+    </div>
+
+    <!-- Right Sidebar: Author Intro & Tags -->
+    <aside class="lg:col-span-1 flex flex-col space-y-10 border-t border-border-base/60 pt-10 lg:border-t-0 lg:pt-0 lg:border-l lg:border-border-base/60 lg:pl-10">
+      
+      <!-- Author Section -->
+      <div class="flex flex-col space-y-4">
+        <h3 class="font-serif text-lg font-semibold text-text-base">关于作者</h3>
+        <div class="flex items-center space-x-3">
+          <div class="flex h-12 w-12 items-center justify-center rounded-full border border-border-base bg-code-bg font-serif text-lg font-bold text-accent-base">
+            王
+          </div>
+          <div>
+            <div class="font-medium text-text-base text-sm">王焕章agi</div>
+            <div class="text-xs text-text-muted">做务实的AI学习者</div>
+          </div>
+        </div>
+        <p class="text-xs text-text-muted leading-relaxed">
+          关注产品、编程、跨境和个人副业。趁年轻多折腾，早点退休。
+        </p>
+      </div>
+
+      <!-- Popular Tags Section -->
+      <div class="flex flex-col space-y-4">
+        <h3 class="font-serif text-lg font-semibold text-text-base">热门标签</h3>
+        {popularTags.length > 0 ? (
+          <div class="flex flex-wrap gap-2">
+            {popularTags.map((tag) => (
+              <Tag name={tag} />
+            ))}
+          </div>
+        ) : (
+          <p class="text-xs text-text-muted italic">暂无标签。</p>
+        )}
+      </div>
+
+      <!-- Quick Info Grid -->
+      <div class="border-t border-border-base/60 pt-6 text-xs text-text-muted flex flex-col space-y-2">
+        <div class="flex justify-between">
+          <span>订阅系统:</span>
+          <a href="/rss.xml" class="text-accent-base hover:underline">RSS XML</a>
+        </div>
+        <div class="flex justify-between">
+          <span>项目开源:</span>
+          <a href="https://github.com" target="_blank" class="text-text-base hover:underline">GitHub</a>
+        </div>
+      </div>
+      
+    </aside>
+  </div>
+</Layout>

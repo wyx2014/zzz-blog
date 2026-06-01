@@ -1,0 +1,224 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('blog', ({ data }) => {
+  return import.meta.env.PROD ? !data.draft : true;
+});
+
+// Create search database list
+const searchList = posts.map((post) => ({
+  title: post.data.title,
+  description: post.data.description,
+  slug: post.id.replace(/\.[^/.]+$/, ""),
+  pubDate: post.data.pubDate.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }),
+  tags: post.data.tags,
+}));
+---
+
+<Layout 
+  title="文章搜索 | WYX's Journal"
+  description="快速模糊搜索本博客的所有文章，支持键盘上下方向键选择和回车浏览。"
+>
+  <div class="mx-auto max-w-2xl flex flex-col space-y-6">
+    <!-- Header info -->
+    <div class="border-b border-border-base pb-6">
+      <span class="text-xs font-semibold uppercase tracking-wider text-accent-base">Search System</span>
+      <h1 class="font-serif text-3xl font-bold tracking-tight text-text-base md:text-4xl mt-2">
+        文章搜索
+      </h1>
+      <p class="text-sm text-text-muted mt-2">
+        输入标题、描述或标签关键字进行全局模糊搜索。支持使用 <kbd class="px-1.5 py-0.5 text-[10px] font-mono border border-border-base bg-code-bg rounded text-text-muted">↑</kbd> <kbd class="px-1.5 py-0.5 text-[10px] font-mono border border-border-base bg-code-bg rounded text-text-muted">↓</kbd> 移动选择，<kbd class="px-1.5 py-0.5 text-[10px] font-mono border border-border-base bg-code-bg rounded text-text-muted">Enter</kbd> 打开。
+      </p>
+    </div>
+
+    <!-- Search Input Box container -->
+    <div 
+      id="search-provider" 
+      data-list={JSON.stringify(searchList)}
+      class="relative flex flex-col space-y-6 w-full"
+    >
+      <div class="relative w-full">
+        <!-- Search icon -->
+        <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-text-muted">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+        
+        <!-- Input -->
+        <input 
+          type="text" 
+          id="search-input"
+          placeholder="搜索您感兴趣的文字..." 
+          autocomplete="off"
+          class="w-full pl-12 pr-16 py-3.5 border border-border-base rounded-xl bg-code-bg/50 text-text-base focus:bg-bg-base focus:border-accent-base focus:ring-1 focus:ring-accent-base outline-none transition-all duration-300 placeholder-text-muted text-base shadow-sm"
+          autofocus
+        />
+
+        <!-- Shortcut placeholder -->
+        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+          <span class="text-[10px] font-mono tracking-wide px-2 py-0.5 border border-border-base bg-code-bg rounded text-text-muted/60 hidden sm:inline">
+            ⌘ K
+          </span>
+        </div>
+      </div>
+
+      <!-- Search Results List -->
+      <div id="search-results-list" class="flex flex-col space-y-3 w-full" role="listbox">
+        <!-- Javascript dynamically renders contents here -->
+        <p class="text-sm text-text-muted italic py-6 text-center select-none">
+          请输入搜索关键字进行查找。
+        </p>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import Fuse from 'fuse.js';
+
+  interface SearchItem {
+    title: string;
+    description: string;
+    slug: string;
+    pubDate: string;
+    tags: string[];
+  }
+
+  function initSearch() {
+    const provider = document.getElementById('search-provider');
+    const input = document.getElementById('search-input') as HTMLInputElement | null;
+    const resultsContainer = document.getElementById('search-results-list');
+
+    if (!provider || !input || !resultsContainer) return;
+
+    // Load data from serialized Astro attribute
+    const dataList: SearchItem[] = JSON.parse(provider.getAttribute('data-list') || '[]');
+
+    // Setup Fuse.js fuzzy engine
+    const fuse = new Fuse(dataList, {
+      keys: [
+        { name: 'title', weight: 0.6 },
+        { name: 'description', weight: 0.3 },
+        { name: 'tags', weight: 0.1 }
+      ],
+      threshold: 0.4,
+      ignoreLocation: true,
+    });
+
+    let currentFocusIndex = -1;
+
+    // Hotkey: Cmd/Ctrl + K focus
+    window.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        input.focus();
+      }
+    });
+
+    function renderResults(results: any[]) {
+      currentFocusIndex = -1; // Reset focus
+      resultsContainer!.innerHTML = '';
+
+      if (results.length === 0) {
+        resultsContainer!.innerHTML = `
+          <div class="py-12 flex flex-col items-center justify-center text-text-muted">
+            <span class="text-3xl mb-2">🔍</span>
+            <p class="text-sm italic">未找到匹配的文章，换个词试试吧。</p>
+          </div>
+        `;
+        return;
+      }
+
+      results.forEach((result, idx) => {
+        const item: SearchItem = result.item;
+        
+        const tagsHtml = item.tags.map(t => `
+          <span class="inline-flex px-1.5 py-0.5 text-[10px] bg-border-base/50 text-text-muted rounded">#${t}</span>
+        `).join('');
+
+        const itemEl = document.createElement('a');
+        itemEl.href = `/posts/${item.slug}`;
+        itemEl.className = 'search-result-item flex flex-col p-4 border border-border-base/60 bg-code-bg/30 rounded-xl hover:border-accent-base hover:bg-accent-muted/10 transition-all duration-200 outline-none text-left relative focus:border-accent-base focus:bg-accent-muted/10';
+        itemEl.id = `search-item-${idx}`;
+        itemEl.setAttribute('role', 'option');
+        itemEl.setAttribute('aria-selected', 'false');
+        
+        itemEl.innerHTML = `
+          <div class="flex items-center justify-between text-[11px] text-text-muted w-full mb-1">
+            <span>${item.pubDate}</span>
+            <div class="flex gap-1">${tagsHtml}</div>
+          </div>
+          <h3 class="font-serif text-base font-semibold text-text-base mb-1.5 transition-colors group-hover:text-accent-base search-item-title">
+            ${item.title}
+          </h3>
+          <p class="text-xs text-text-muted leading-relaxed line-clamp-2">
+            ${item.description}
+          </p>
+        `;
+
+        resultsContainer!.appendChild(itemEl);
+      });
+    }
+
+    // Input change handler
+    input.addEventListener('input', () => {
+      const value = input.value.trim();
+      if (!value) {
+        resultsContainer.innerHTML = `
+          <p class="text-sm text-text-muted italic py-6 text-center select-none">
+            请输入搜索关键字进行查找。
+          </p>
+        `;
+        return;
+      }
+
+      const results = fuse.search(value);
+      renderResults(results);
+    });
+
+    // Keyboard navigation (Up, Down, Enter) inside search results
+    input.addEventListener('keydown', (e) => {
+      const items = resultsContainer.querySelectorAll('.search-result-item');
+      if (items.length === 0) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        currentFocusIndex = (currentFocusIndex + 1) % items.length;
+        updateFocus(items);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        currentFocusIndex = (currentFocusIndex - 1 + items.length) % items.length;
+        updateFocus(items);
+      } else if (e.key === 'Enter') {
+        if (currentFocusIndex >= 0 && currentFocusIndex < items.length) {
+          e.preventDefault();
+          (items[currentFocusIndex] as HTMLAnchorElement).click();
+        }
+      }
+    });
+
+    function updateFocus(items: NodeListOf<Element>) {
+      items.forEach((item, idx) => {
+        if (idx === currentFocusIndex) {
+          item.classList.add('border-accent-base', 'bg-accent-muted/20');
+          item.setAttribute('aria-selected', 'true');
+          item.scrollIntoView({ block: 'nearest' });
+        } else {
+          item.classList.remove('border-accent-base', 'bg-accent-muted/20');
+          item.setAttribute('aria-selected', 'false');
+        }
+      });
+    }
+  }
+
+  // Run on load
+  initSearch();
+  // Support swaps
+  document.addEventListener('astro:after-swap', initSearch);
+</script>

@@ -1,0 +1,59 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Tag from '../../components/Tag.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('blog', ({ data }) => {
+  return import.meta.env.PROD ? !data.draft : true;
+});
+
+// Calculate tag counts
+const tags = allPosts.flatMap((post) => post.data.tags);
+const tagCounts = tags.reduce((acc, tag) => {
+  acc[tag] = (acc[tag] || 0) + 1;
+  return acc;
+}, {} as Record<string, number>);
+
+// Sort tags by popularity
+const sortedTags = Object.keys(tagCounts).sort(
+  (a, b) => tagCounts[b] - tagCounts[a]
+);
+---
+
+<Layout 
+  title="标签云 | WYX's Journal"
+  description="浏览本站博客的所有文章标签分类，选择感兴趣的主题深入阅读。"
+>
+  <div class="flex flex-col space-y-8 max-w-3xl mx-auto">
+    <!-- Header info -->
+    <div class="border-b border-border-base pb-6">
+      <span class="text-xs font-semibold uppercase tracking-wider text-accent-base">Tag System</span>
+      <h1 class="font-serif text-3xl font-bold tracking-tight text-text-base md:text-4xl mt-2">
+        所有标签
+      </h1>
+      <p class="text-sm text-text-muted mt-2">
+        以下是目前已发布的文章所涉及的所有知识主题。点击即可按对应标签检索所有相关文章。
+      </p>
+    </div>
+
+    <!-- Tags Cloud -->
+    {sortedTags.length > 0 ? (
+      <div class="flex flex-wrap gap-4 py-6">
+        {sortedTags.map((tag) => (
+          <a
+            href={`/tags/${tag}/1`}
+            class="group inline-flex items-center rounded-xl border border-border-base bg-code-bg px-4 py-2 text-sm font-medium text-text-base hover:border-accent-base hover:bg-accent-muted/10 transition-all duration-200"
+          >
+            <span class="text-accent-base mr-1.5 select-none">#</span>
+            <span class="group-hover:text-accent-base transition-colors">{tag}</span>
+            <span class="ml-2 rounded-md bg-border-base px-2 py-0.5 text-[10px] text-text-muted group-hover:bg-accent-base/10 group-hover:text-accent-base transition-colors">
+              {tagCounts[tag]}
+            </span>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <p class="text-text-muted text-sm italic py-8 text-center">暂无文章标签数据。</p>
+    )}
+  </div>
+</Layout>

@@ -1,0 +1,189 @@
+---
+import Layout from './Layout.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import Tag from '../components/Tag.astro';
+import TOC from '../components/TOC.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  pubDate: Date;
+  updatedDate?: Date;
+  tags: string[];
+  headings: {
+    depth: number;
+    slug: string;
+    text: string;
+  }[];
+}
+
+const { title, description, pubDate, updatedDate, tags, headings } = Astro.props;
+---
+
+<Layout title={`${title} | WYX's Journal`} description={description}>
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-12">
+    <!-- Main Article Body -->
+    <article class="lg:col-span-3 flex flex-col min-w-0" lang="zh-CN">
+      <!-- Article Header -->
+      <header class="border-b border-border-base pb-8 mb-8 flex flex-col space-y-4">
+        <!-- Date -->
+        <div class="text-xs font-semibold uppercase tracking-wider text-accent-base">
+          发布于 <FormattedDate date={pubDate} />
+          {updatedDate && (
+            <span class="text-text-muted italic ml-2">
+              (编辑于 <FormattedDate date={updatedDate} />)
+            </span>
+          )}
+        </div>
+
+        <!-- Title -->
+        <h1 class="font-serif text-3xl font-bold tracking-tight text-text-base md:text-4xl lg:text-5xl leading-tight">
+          {title}
+        </h1>
+
+        <!-- Description -->
+        <p class="text-base text-text-muted leading-relaxed italic md:text-lg">
+          {description}
+        </p>
+
+        <!-- Tags -->
+        <div class="flex flex-wrap gap-2 pt-2">
+          {tags.map((tag) => (
+            <Tag name={tag} />
+          ))}
+        </div>
+      </header>
+
+      <!-- Markdown Content Slot -->
+      <div class="markdown-content w-full">
+        <slot />
+      </div>
+
+      <!-- Article Footer -->
+      <footer class="border-t border-border-base/60 mt-12 pt-8 flex items-center justify-between text-sm">
+        <a 
+          href="/posts/1" 
+          class="inline-flex items-center space-x-1.5 text-text-muted hover:text-accent-base transition-colors group"
+        >
+          <svg class="h-4 w-4 transform transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          <span>返回文章列表</span>
+        </a>
+
+        <button 
+          id="back-to-top"
+          class="inline-flex items-center space-x-1.5 text-text-muted hover:text-accent-base transition-colors cursor-pointer"
+        >
+          <span>回到顶部</span>
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
+          </svg>
+        </button>
+      </footer>
+    </article>
+
+    <!-- Sidebar TOC Table of Contents (Hidden on mobile) -->
+    <aside class="hidden lg:col-span-1 lg:block">
+      <div class="sticky top-28 flex flex-col space-y-8 pl-4 border-l border-border-base/60">
+        <!-- Floating Table of Contents -->
+        <TOC headings={headings} />
+
+        <!-- Read Progress -->
+        <div class="border-t border-border-base/60 pt-6 text-xs text-text-muted">
+          <div class="flex justify-between mb-2">
+            <span>阅读进度:</span>
+            <span id="read-progress-text">0%</span>
+          </div>
+          <div class="w-full bg-code-bg h-1 rounded-full overflow-hidden">
+            <div id="read-progress-bar" class="bg-accent-base h-full w-0 transition-all duration-100"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</Layout>
+
+<script>
+  // Setup Article detail page enhancements
+  function initPostScript() {
+    // 1. Back to Top Button
+    const backToTopBtn = document.getElementById('back-to-top');
+    if (backToTopBtn) {
+      backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    // 2. Read Progress Tracker
+    const progressBar = document.getElementById('read-progress-bar');
+    const progressText = document.getElementById('read-progress-text');
+    
+    if (progressBar && progressText) {
+      const updateProgress = () => {
+        const article = document.querySelector('article');
+        if (!article) return;
+
+        const totalHeight = article.scrollHeight - window.innerHeight;
+        const currentScroll = window.scrollY - article.offsetTop;
+
+        let percentage = 0;
+        if (totalHeight > 0 && currentScroll > 0) {
+          percentage = Math.round((currentScroll / totalHeight) * 100);
+        }
+        
+        // Clamp between 0 and 100
+        percentage = Math.max(0, Math.min(100, percentage));
+
+        progressBar.style.width = `${percentage}%`;
+        progressText.textContent = `${percentage}%`;
+      };
+
+      window.addEventListener('scroll', updateProgress);
+      window.addEventListener('resize', updateProgress);
+      updateProgress();
+    }
+
+    // 3. Dynamic "Copy" button wrapper for Shiki Pre Code Blocks
+    const preBlocks = document.querySelectorAll('.markdown-content pre');
+    preBlocks.forEach((pre) => {
+      // Check if button is already added to avoid duplicates on client swap
+      if (pre.parentElement?.classList.contains('code-block-container')) return;
+
+      const container = document.createElement('div');
+      container.className = 'relative code-block-container group/code w-full my-6';
+      
+      pre.parentNode?.insertBefore(container, pre);
+      container.appendChild(pre);
+
+      // Add a clean, minimal copy button
+      const button = document.createElement('button');
+      button.className = 'absolute right-3 top-3 px-2 py-1 text-[10px] uppercase font-mono tracking-wider text-text-muted border border-border-base bg-bg-base/80 backdrop-blur rounded hover:text-accent-base hover:border-accent-base transition opacity-0 group-hover/code:opacity-100 active:scale-95 cursor-pointer z-20';
+      button.textContent = 'Copy';
+      container.appendChild(button);
+
+      button.addEventListener('click', () => {
+        const codeElement = pre.querySelector('code');
+        if (!codeElement) return;
+
+        const text = codeElement.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+          button.textContent = 'Copied!';
+          button.classList.add('text-accent-base', 'border-accent-base');
+          
+          setTimeout(() => {
+            button.textContent = 'Copy';
+            button.classList.remove('text-accent-base', 'border-accent-base');
+          }, 2000);
+        }).catch((err) => {
+          console.error('Failed to copy text: ', err);
+        });
+      });
+    });
+  }
+
+  // Run on initial load
+  initPostScript();
+  // Support swappings if needed
+  document.addEventListener('astro:after-swap', initPostScript);
+</script>

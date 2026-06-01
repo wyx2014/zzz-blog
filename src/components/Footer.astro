@@ -1,0 +1,30 @@
+---
+const today = new Date();
+---
+
+<footer class="mt-auto w-full border-t border-border-base bg-bg-base/30 py-8 text-xs text-text-muted transition-all duration-300">
+  <div class="mx-auto max-w-5xl px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+    <!-- Copyright -->
+    <div class="flex items-center space-x-2">
+      <span>&copy; {today.getFullYear()} 王焕章agi. All rights reserved.</span>
+      <span class="text-border-base">|</span>
+      <span>Built with Astro</span>
+    </div>
+
+    <!-- Socials / Additional links -->
+    <div class="flex items-center space-x-6">
+      <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="hover:text-text-base transition-colors duration-200">
+        GitHub
+      </a>
+      <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="hover:text-text-base transition-colors duration-200">
+        Twitter
+      </a>
+      <a href="/rss.xml" class="hover:text-accent-base transition-colors duration-200">
+        RSS Feed
+      </a>
+      <a href="/robots.txt" class="hover:text-text-base transition-colors duration-200">
+        Sitemap
+      </a>
+    </div>
+  </div>
+</footer>
