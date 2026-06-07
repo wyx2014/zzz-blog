@@ -45,7 +45,7 @@ curl -fsSL https://claude.ai/install.cmd -o install.cmd && ./install.cmd && rm i
 ```
 复制上面的命令，依次粘贴到 Git Bash 回车。这个时候像“卡住”一样是正常的，表示开始下载软件，等一会就好。
 
-![alt text](image.png)
+![alt text](./claude-code-first/image.png)
 
 ### 设置环境变量
 
@@ -59,7 +59,7 @@ powershell -Command "[Environment]::SetEnvironmentVariable('Path', [Environment]
 
 https://git-scm.com/install/windows
 
-![alt text](image-1.png)
+![alt text](./claude-code-first/image-1.png)
 
 ## 2. 两句命令完成配置
 
@@ -75,7 +75,7 @@ python3 -c 'import json, os; p=os.path.expanduser("~/.claude.json"); data=json.l
 
 复制上面的命令，粘贴到 Terminal 回车。
 
-![alt text](image-2.png)
+![alt text](./claude-code-first/image-2.png)
 
 **Windows**
 
@@ -97,7 +97,7 @@ fi
 
 复制上面的命令，粘贴到 Git Bash 回车。
 
-![alt text](image-3.png)
+![alt text](./claude-code-first/image-3.png)
 
 ### 第二句：配置 API Key
 
@@ -119,7 +119,7 @@ EOF
 
 MacOS 复制上面的命令，粘贴到 Terminal 回车。
 
-![alt text](image-4.png)
+![alt text](./claude-code-first/image-4.png)
 
 Windows 复制上面的命令，粘贴到 Git Bash 回车
 
@@ -137,15 +137,15 @@ claude
 
 选择：Yes, I trust this folder，回车。
 
-![alt text](image-5.png)
+![alt text](./claude-code-first/image-5.png)
 
 回车之后会直接进入到下图界面（不会提示登录）。
 
-![alt text](image-6.png)
+![alt text](./claude-code-first/image-6.png)
 
 测试对话：
 
-![alt text](image-7.png)
+![alt text](./claude-code-first/image-7.png)
 
 恭喜你成功安装 Claude Code。
 
