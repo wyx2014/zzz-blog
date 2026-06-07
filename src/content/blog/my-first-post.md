@@ -1,14 +1,14 @@
 ---
 
-title: "重构美学：探索 Claude Docs 风格的博客设计"
+title: "探索 Claude Docs 风格的博客设计"
 description: "记录一次个人博客视觉重构：为什么我想要接近 Claude Docs 的阅读体验，以及如何用 Astro、Tailwind 和极简排版，把博客做得更安静、更耐看、更适合长期写作。"
 pubDate: 2026-06-01
 updatedDate: 2026-06-01
 heroImage: ""
-tags: ["Design", "Astro", "Tailwind"]
+tags: ["Design", "Astro"]
 ---
 
-# 重构美学：探索 Claude Docs 风格的博客设计
+# 探索 Claude Docs 风格的博客设计
 
 做个人博客这件事，我想了很久。
 
