@@ -3,6 +3,7 @@ import Layout from './Layout.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Tag from '../components/Tag.astro';
 import TOC from '../components/TOC.astro';
+import Comments from '../components/Comments.astro';
 
 interface Props {
   title: string;
@@ -58,6 +59,9 @@ const { title, description, pubDate, updatedDate, tags, headings } = Astro.props
       <div class="markdown-content w-full">
         <slot />
       </div>
+
+      <!-- Comments Module -->
+      <Comments />
 
       <!-- Article Footer -->
       <footer class="border-t border-border-base/60 mt-12 pt-8 flex items-center justify-between text-sm">
