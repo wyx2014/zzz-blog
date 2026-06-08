@@ -1,11 +1,11 @@
 ---
 
 title: "A股投资新手日记"
-description: ""
+description: "一个程序员新手入市后，被A股教育了两次的故事。"
 pubDate: 2026-06-07
 updatedDate: 2026-06-07
 heroImage: ""
-tags: ["investment", "stock"]
+tags: ["investment", "A股"]
 ---
 
 # A股投资新手日记
