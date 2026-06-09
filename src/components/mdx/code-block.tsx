@@ -11,7 +11,10 @@ type CodeBlockProps = ComponentProps<"pre">;
 function extractLanguage(className?: string): string {
   if (!className) return "plaintext";
   const match = className.match(/language-([a-z0-9-]+)/i);
-  return match ? match[1] : "plaintext";
+  if (!match) return "plaintext";
+  const lang = match[1].toLowerCase();
+  if (lang === "powershell") return "shell";
+  return lang;
 }
 
 export function CodeBlock({ children, ...props }: CodeBlockProps) {

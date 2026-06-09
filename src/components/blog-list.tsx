@@ -38,8 +38,8 @@ function BlogListContent({ posts }: BlogListProps) {
   // Filter posts by selected tag if tagParam exists
   const filteredPosts = tagParam
     ? posts.filter((post) =>
-        post.tags?.some((t) => t.toLowerCase() === tagParam.toLowerCase())
-      )
+      post.tags?.some((t) => t.toLowerCase() === tagParam.toLowerCase())
+    )
     : posts;
 
   const totalPages = Math.ceil(filteredPosts.length / PAGE_SIZE);
@@ -56,8 +56,8 @@ function BlogListContent({ posts }: BlogListProps) {
       {allTags.length > 0 && (
         <BlurFade delay={BLUR_FADE_DELAY}>
           <div className="flex items-center gap-2 mb-8 w-full relative">
-            <span className="text-xs font-mono text-muted-foreground shrink-0 uppercase tracking-wider">Tags:</span>
-            <div 
+            <span className="text-xs font-mono text-muted-foreground shrink-0 uppercase tracking-wider">标签:</span>
+            <div
               className="flex gap-2 overflow-x-auto scrollbar-none flex-nowrap flex-1 py-1 -my-1 px-4 -mx-4"
               style={{
                 maskImage: "linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent)",
@@ -168,9 +168,8 @@ function BlogListContent({ posts }: BlogListProps) {
             <div className="flex gap-2 sm:justify-end">
               {pagination.hasPreviousPage ? (
                 <Link
-                  href={`/blog?page=${pagination.page - 1}${
-                    tagParam ? `&tag=${encodeURIComponent(tagParam)}` : ""
-                  }`}
+                  href={`/blog?page=${pagination.page - 1}${tagParam ? `&tag=${encodeURIComponent(tagParam)}` : ""
+                    }`}
                   className="h-8 w-fit px-2 flex items-center justify-center text-sm border border-border rounded-lg hover:bg-accent/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   Previous
@@ -182,9 +181,8 @@ function BlogListContent({ posts }: BlogListProps) {
               )}
               {pagination.hasNextPage ? (
                 <Link
-                  href={`/blog?page=${pagination.page + 1}${
-                    tagParam ? `&tag=${encodeURIComponent(tagParam)}` : ""
-                  }`}
+                  href={`/blog?page=${pagination.page + 1}${tagParam ? `&tag=${encodeURIComponent(tagParam)}` : ""
+                    }`}
                   className="h-8 w-fit px-2 flex items-center justify-center text-sm border border-border rounded-lg hover:bg-accent/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   Next
