@@ -1,6 +1,5 @@
- 
 import { ImageResponse } from "next/og";
-import { DATA } from "@/data/resume";
+import { getFontData, getAvatarDataUrl } from "@/lib/og";
 
 export const dynamic = "force-static";
 
@@ -10,23 +9,6 @@ export const size = {
     height: 630,
 };
 export const contentType = "image/png";
-
-const getFontData = async () => {
-    try {
-        const [cabinetGrotesk, clashDisplay] = await Promise.all([
-            fetch(
-                new URL("../../../public/fonts/CabinetGrotesk-Medium.ttf", import.meta.url)
-            ).then((res) => res.arrayBuffer()),
-            fetch(
-                new URL("../../../public/fonts/ClashDisplay-Semibold.ttf", import.meta.url)
-            ).then((res) => res.arrayBuffer()),
-        ]);
-        return { cabinetGrotesk, clashDisplay };
-    } catch (error) {
-        console.error("Failed to load fonts:", error);
-        return null;
-    }
-};
 
 const styles = {
     outerWrapper: {
@@ -110,9 +92,7 @@ export default async function Image() {
         const fontData = await getFontData();
         const title = "Blog";
         const description = "Thoughts on software development, life, and more.";
-        const imageUrl = DATA.avatarUrl
-            ? new URL(DATA.avatarUrl, DATA.url).toString()
-            : undefined;
+        const imageUrl = getAvatarDataUrl();
 
         return new ImageResponse(
             (

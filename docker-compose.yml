@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  zzz-blog:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zzz-blog
+    ports:
+      - "8081:80"
+    restart: always
