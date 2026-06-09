@@ -67,9 +67,27 @@ export default function BlogTimelineSection() {
                   </div>
                 </TimelineConnectItem>
                 <div className="flex flex-1 flex-col justify-start gap-2 min-w-0">
-                  {post.publishedAt && (
-                    <time className="text-xs text-muted-foreground">{post.publishedAt}</time>
-                  )}
+                  <div className="flex items-center gap-2.5 text-xs text-muted-foreground flex-wrap">
+                    {post.publishedAt && (
+                      <time className="text-xs text-muted-foreground">{post.publishedAt}</time>
+                    )}
+                    {post.tags && post.tags.length > 0 && (
+                      <>
+                        <span>•</span>
+                        <div className="flex gap-1.5 flex-wrap">
+                          {post.tags.map((tag) => (
+                            <Link
+                              key={tag}
+                              href={`/blog?tag=${encodeURIComponent(tag)}`}
+                              className="text-[10px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border border-border bg-secondary hover:text-primary hover:border-primary/50 transition-colors"
+                            >
+                              {tag}
+                            </Link>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
                   {post.title && (
                     <Link href={`/blog/${slug}`} className="hover:underline">
                       <h3 className="font-semibold leading-none text-lg text-foreground hover:text-primary transition-colors">

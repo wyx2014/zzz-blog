@@ -132,9 +132,25 @@ export default async function Blog({
         <h1 className="title font-semibold text-3xl md:text-4xl tracking-tighter leading-tight">
           {post.title}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          {formatDate(post.publishedAt)}
-        </p>
+        <div className="flex items-center gap-2.5 text-sm text-muted-foreground flex-wrap">
+          <span>{formatDate(post.publishedAt)}</span>
+          {post.tags && post.tags.length > 0 && (
+            <>
+              <span>•</span>
+              <div className="flex gap-2 flex-wrap">
+                {post.tags.map((tag) => (
+                  <Link
+                    key={tag}
+                    href={`/blog?tag=${encodeURIComponent(tag)}`}
+                    className="text-xs px-2 py-0.5 rounded border border-border bg-secondary hover:text-primary hover:border-primary/50 transition-colors font-mono"
+                  >
+                    {tag}
+                  </Link>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
       <div className="my-6 flex w-full items-center">
         <div

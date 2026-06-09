@@ -20,6 +20,7 @@ const posts = defineCollection({
         image: z.string().optional(),
         heroImage: z.string().optional(), // Supports Astro's heroImage
         icon: z.string().optional(), // Custom icon name for timelines
+        tags: z.array(z.string()).optional(), // Added tags field
         content: z.string(),
     }),
     transform: async (document, context) => {
@@ -46,12 +47,16 @@ const posts = defineCollection({
         // Custom icon mapping
         const icon = document.icon || undefined;
 
+        // Map tags (default to empty array if not defined)
+        const tags = document.tags || [];
+
         return {
             ...document,
             publishedAt,
             summary,
             image,
             icon,
+            tags,
             mdx,
         };
     },
