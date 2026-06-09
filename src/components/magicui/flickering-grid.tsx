@@ -28,7 +28,7 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const [isInView, setIsInView] = useState(false)
+  const isInViewRef = useRef(false)
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 })
   const [resolvedColor, setResolvedColor] = useState<string>("rgb(0, 0, 0)")
 
@@ -136,23 +136,41 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
       dpr: number
     ) => {
       ctx.clearRect(0, 0, width, height)
-      ctx.fillStyle = "transparent"
-      ctx.fillRect(0, 0, width, height)
+
+      if (maxOpacity <= 0) return
+
+      const numBuckets = 10
+      const paths: Array<Path2D | undefined> = new Array(numBuckets + 1)
+
+      const size = squareSize * dpr
+      const step = (squareSize + gridGap) * dpr
 
       for (let i = 0; i < cols; i++) {
         for (let j = 0; j < rows; j++) {
           const opacity = squares[i * rows + j]
-          ctx.fillStyle = `${memoizedColor}${opacity})`
-          ctx.fillRect(
-            i * (squareSize + gridGap) * dpr,
-            j * (squareSize + gridGap) * dpr,
-            squareSize * dpr,
-            squareSize * dpr
+          if (opacity <= 0) continue
+
+          const bucketIndex = Math.min(
+            numBuckets,
+            Math.max(1, Math.round((opacity / maxOpacity) * numBuckets))
           )
+
+          const path = paths[bucketIndex] ?? new Path2D()
+          path.rect(i * step, j * step, size, size)
+          paths[bucketIndex] = path
         }
       }
+
+      for (let b = 1; b <= numBuckets; b++) {
+        const path = paths[b]
+        if (!path) continue
+
+        const opacity = (b / numBuckets) * maxOpacity
+        ctx.fillStyle = `${memoizedColor}${opacity.toFixed(2)})`
+        ctx.fill(path)
+      }
     },
-    [memoizedColor, squareSize, gridGap]
+    [memoizedColor, squareSize, gridGap, maxOpacity]
   )
 
   useEffect(() => {
@@ -163,7 +181,7 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    let animationFrameId: number
+    let animationFrameId: number | null = null
     let gridParams: ReturnType<typeof setupCanvas>
 
     const updateCanvasSize = () => {
@@ -176,22 +194,54 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
     updateCanvasSize()
 
     let lastTime = 0
-    const animate = (time: number) => {
-      if (!isInView) return
+    let timeSinceLastFrame = 0
+    const targetFps = 30
+    const frameInterval = 1000 / targetFps
+    const stopAnimation = () => {
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId)
+        animationFrameId = null
+      }
+      lastTime = 0
+      timeSinceLastFrame = 0
+    }
 
-      const deltaTime = (time - lastTime) / 1000
+    const animate = (time: number) => {
+      if (!isInViewRef.current) {
+        stopAnimation()
+        return
+      }
+
+      if (!lastTime) {
+        lastTime = time
+      }
+
+      const deltaTime = time - lastTime
+      timeSinceLastFrame += deltaTime
       lastTime = time
 
-      updateSquares(gridParams.squares, deltaTime)
-      drawGrid(
-        ctx,
-        canvas.width,
-        canvas.height,
-        gridParams.cols,
-        gridParams.rows,
-        gridParams.squares,
-        gridParams.dpr
-      )
+      if (timeSinceLastFrame >= frameInterval) {
+        const deltaSec = timeSinceLastFrame / 1000
+        updateSquares(gridParams.squares, deltaSec)
+        drawGrid(
+          ctx,
+          canvas.width,
+          canvas.height,
+          gridParams.cols,
+          gridParams.rows,
+          gridParams.squares,
+          gridParams.dpr
+        )
+        timeSinceLastFrame = timeSinceLastFrame % frameInterval
+      }
+
+      animationFrameId = requestAnimationFrame(animate)
+    }
+
+    const startAnimation = () => {
+      if (animationFrameId !== null) return
+
+      timeSinceLastFrame = frameInterval
       animationFrameId = requestAnimationFrame(animate)
     }
 
@@ -203,28 +253,33 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
 
     const intersectionObserver = new IntersectionObserver(
       ([entry]) => {
-        setIsInView(entry.isIntersecting)
+        isInViewRef.current = entry.isIntersecting
+        if (entry.isIntersecting) {
+          startAnimation()
+        } else {
+          stopAnimation()
+        }
       },
       { threshold: 0 }
     )
 
     intersectionObserver.observe(canvas)
 
-    if (isInView) {
-      animationFrameId = requestAnimationFrame(animate)
+    if (isInViewRef.current) {
+      startAnimation()
     }
 
     return () => {
-      cancelAnimationFrame(animationFrameId)
+      stopAnimation()
       resizeObserver.disconnect()
       intersectionObserver.disconnect()
     }
-  }, [setupCanvas, updateSquares, drawGrid, width, height, isInView])
+  }, [setupCanvas, updateSquares, drawGrid, width, height])
 
   return (
     <div
       ref={containerRef}
-      className={cn(`h-full w-full ${className}`)}
+      className={cn("h-full w-full", className)}
       {...props}
     >
       <canvas
@@ -238,4 +293,3 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
     </div>
   )
 }
-
