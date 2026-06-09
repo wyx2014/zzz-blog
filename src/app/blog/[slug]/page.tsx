@@ -7,6 +7,7 @@ import { MDXContent } from "@content-collections/mdx/react";
 import { mdxComponents } from "@/mdx-components";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Comments from "@/components/comments";
 
 function getSortedPosts() {
   return [...allPosts].sort((a, b) => {
@@ -166,6 +167,8 @@ export default async function Blog({
       <article className="prose max-w-full text-pretty font-sans leading-relaxed text-muted-foreground dark:prose-invert">
         <MDXContent code={post.mdx} components={mdxComponents} />
       </article>
+
+      <Comments />
 
       <nav className="mt-12 pt-8 max-w-2xl">
         <div className="flex flex-col sm:flex-row justify-between gap-4">
