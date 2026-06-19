@@ -37,6 +37,12 @@ Google在年初有Pixel手机送[Google One会员活动](https://support.google.
 
 可以通过Telegram机器人，通过[Telegram地址](https://t.me/PixelGemini)进入机器人。
 
+由于Telegram机器人付款只支持加密货币，推荐注册个币安账号。
+
+> 跑个题，如果你要购买Apple礼品卡、充值接码平台等，有个币安账号会方便不少。
+
+欢迎你通过[我的链接](https://www.bsmkweb.cc/register?ref=116137656)或推荐码**116137656**注册，非常感谢。
+
 通过充值1美元，获得1积分，就可以开始Pixel认证。
 
 首先确保你的账号满足以下条件：
