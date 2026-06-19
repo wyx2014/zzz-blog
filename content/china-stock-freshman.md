@@ -5,7 +5,7 @@ description: "新手入市，被A股教育了两次的故事。"
 pubDate: 2026-06-07
 updatedDate: 2026-06-07
 heroImage: ""
-icon: "line-chart"
+icon: "trending-up"
 tags: ["Investment"]
 ---
 

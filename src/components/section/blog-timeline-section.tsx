@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { allPosts } from "content-collections";
 import { Timeline, TimelineItem, TimelineConnectItem } from "@/components/timeline";
-import { BookOpen, Server, Terminal, LineChart, Cpu } from "lucide-react";
+import { BookOpen, Server, Terminal, LineChart, Cpu, Sparkles, TrendingUp, Palette } from "lucide-react";
 import BlurFade from "@/components/magicui/blur-fade";
 
 const BLUR_FADE_DELAY = 0.04;
@@ -14,14 +14,24 @@ function getPostIcon(iconName?: string) {
       return <Server className="size-5 stroke-[1.8]" />;
     case "terminal":
     case "code":
+    case "cli":
       return <Terminal className="size-5 stroke-[1.8]" />;
     case "chart":
     case "line-chart":
-    case "trending-up":
+    case "stock":
+    case "investment":
       return <LineChart className="size-5 stroke-[1.8]" />;
+    case "trending-up":
+      return <TrendingUp className="size-5 stroke-[1.8]" />;
     case "cpu":
     case "ai":
-      return <Cpu className="size-5 stroke-[1.8]" />;
+    case "gemini":
+    case "sparkles":
+      return <Sparkles className="size-5 stroke-[1.8]" />;
+    case "palette":
+    case "design":
+    case "brush":
+      return <Palette className="size-5 stroke-[1.8]" />;
     default:
       return <BookOpen className="size-5 stroke-[1.8]" />;
   }

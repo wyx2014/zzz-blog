@@ -1,11 +1,11 @@
 ---
 
 title: "从夯到拉，新手AI订阅选择"
-description: ""
+description: "干货满满"
 pubDate: 2026-06-11
 updatedDate: 2026-06-11
 heroImage: ""
-icon: "line-chart"
+icon: "ai"
 tags: ["AI"]
 ---
 

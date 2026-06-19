@@ -5,6 +5,7 @@ description: "记录一次个人博客视觉重构：为什么我想要接近 Cl
 pubDate: 2026-06-01
 updatedDate: 2026-06-01
 heroImage: ""
+icon: "palette"
 tags: ["Design"]
 ---
 
